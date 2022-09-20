@@ -1,4 +1,5 @@
-import * as React from "react";
+import React,{useContext} from "react";
+import { basketContext } from "../context/basketItems";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Divider from "@mui/material/Divider";
@@ -16,7 +17,6 @@ import { Link } from "react-router-dom";
 const drawerWidth = 240;
 
 function Navbar(props) {
-
   const { window } = props;
   const [mobileOpen, setMobileOpen] = React.useState(false);
 
@@ -65,6 +65,9 @@ function Navbar(props) {
 
   const container =
     window !== undefined ? () => window().document.body : undefined;
+
+  const { basketItems } = useContext(basketContext);
+
   return (
     <Box sx={{ display: "flex" }}>
       <AppBar
@@ -83,8 +86,7 @@ function Navbar(props) {
             edge="start"
             onClick={handleDrawerToggle}
             sx={{ mr: 2, display: { sm: "none" } }}
-          >
-          </IconButton>
+          ></IconButton>
           <Typography
             variant="h6"
             component="div"
@@ -98,10 +100,14 @@ function Navbar(props) {
           </Typography>
           <Box sx={{ display: { xs: "none", sm: "block" } }}>
             <Link to="/">
-              <Button className="link" sx={{ color: "#fff" }}>Home</Button>
+              <Button className="link" sx={{ color: "#fff" }}>
+                Home
+              </Button>
             </Link>
             <Link to="basket">
-              <Button className="link" sx={{ color: "#fff" }}>Basket</Button>
+              <Button className="link" sx={{ color: "#fff" }}>
+                Basket <sub style={{marginLeft:'5px',fontWeight:'bold',color:'black'}}>{basketItems ? basketItems.length : 0}</sub>
+              </Button>
             </Link>
           </Box>
         </Toolbar>

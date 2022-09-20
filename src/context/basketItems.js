@@ -5,6 +5,7 @@ export const basketContext = createContext([]);
 
 export const BasketItemProvider = ({ children }) => {
   const [products, setProducts] = useState([]);
+  const [basketItems, setBasketItems] = useState([]);
 
   const axiosInstance = axios.create({
     baseURL: "https://northwind.vercel.app/api/",
@@ -15,30 +16,49 @@ export const BasketItemProvider = ({ children }) => {
     },
   });
 
+  const emptyBasket = () => {
+    setBasketItems([]);
+  };
 
-  const emptyCart = () => {
-    setProducts([]);
-  };
   const removeProductFromBasket = (product) => {
-    const filteredProducts = products.filter((x) => x.id !== product.id);
-    setProducts(filteredProducts);
-  };
-  const addProductToBasket = (product) => {
-    const selectedProduct = products.find((x) => x.id === product.id);
-    if (selectedProduct) {
-      const updatedToDo = products.map((prod) => {
-        if (prod.id === selectedProduct.id)
-          return { ...prod, quantity: (prod.quantity += 1) };
-        else return prod;
-      });
-      setProducts(updatedToDo);
+    const duplicateIndex = basketItems.findIndex(
+      (x) => x.productId === product.productId
+    );
+
+    if (duplicateIndex !== -1) {
+      basketItems[duplicateIndex].quantity -= 1;
+      if (basketItems[duplicateIndex].quantity <= 0) {
+        const filteredProducts = basketItems.filter(
+          (x) => x.productId !== product.productId
+        );
+        setBasketItems(filteredProducts);
+      }
+      else{
+        setBasketItems([...basketItems]);
+      }
     } else {
-      const newProdObj = {
-        productId: selectedProduct.id,
-        name: selectedProduct.name,
-        quantity: 1,
-      };
-      setProducts([...products, newProdObj]);
+      setBasketItems([
+        ...basketItems,
+        { productId: product.id, name: product.name, quantity: 1 },
+      ]);
+    }
+  };
+
+  const addProductToBasket = (product, productId) => {
+    let duplicateIndex;
+    if (productId) {
+      duplicateIndex = basketItems.findIndex((x) => x.productId === productId);
+    } else {
+      duplicateIndex = basketItems.findIndex((x) => x.productId === product.id);
+    }
+    if (duplicateIndex !== -1) {
+      basketItems[duplicateIndex].quantity += 1;
+      setBasketItems([...basketItems]);
+    } else {
+      setBasketItems([
+        ...basketItems,
+        { productId: product.id, name: product.name, quantity: 1 },
+      ]);
     }
   };
 
@@ -46,15 +66,14 @@ export const BasketItemProvider = ({ children }) => {
     products,
     axiosInstance,
     setProducts,
-    emptyCart,
+    emptyBasket,
+    basketItems,
     removeProductFromBasket,
     addProductToBasket,
   };
 
   return (
-    <basketContext.Provider value={values}>
-      {children}
-    </basketContext.Provider>
+    <basketContext.Provider value={values}>{children}</basketContext.Provider>
   );
 };
 

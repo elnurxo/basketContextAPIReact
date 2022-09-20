@@ -11,25 +11,42 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import Container from "@mui/material/Container";
 import Button from "@mui/material/Button";
+import toast, { Toaster } from 'react-hot-toast';
 
 function HomePage() {
   const navigate = useNavigate();
 
-  const { addProductToCart , axiosInstance } = useContext(basketContext);
+  const {setProducts, addProductToBasket , axiosInstance } = useContext(basketContext);
 
   const addItem = (item) => {
-    addProductToCart(item);
+    addProductToBasket(item);
+    notify();
   };
 
   const { isLoading, error, data } = useQuery("products", () =>
     axiosInstance.get('products')
-      .then((res) => res.data)
+      .then((res) =>{
+        setProducts(res.data);
+        return res.data;
+      })
   );
+  const notify = () => {
+    toast.success('Product added to basket successfully!',{
+      duration: 1000,
+      position: "top-center",
+      icon: '👏',
+      theme: {
+        primary: 'green',
+        secondary: 'black',
+      }
+    });
+  };
   return (
     <>
       {isLoading && <h3>Loading...</h3>}
       {data && (
         <Container maxWidth="lg" sx={{ marginTop: "30px" }}>
+          <h3 style={{fontSize:'30px',textAlign:'center',width:'100%'}}>Products</h3>
           <TableContainer component={Paper}>
             <Table sx={{ minWidth: 650 }} aria-label="simple table">
               <TableHead>
@@ -76,6 +93,7 @@ function HomePage() {
                       onClick={(e) => e.stopPropagation()}
                     >
                       <Button variant="contained" onClick={()=> addItem(product)}>Add</Button>
+                      <Toaster/>
                     </TableCell>
                   </TableRow>
                 ))}
